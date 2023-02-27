@@ -46,13 +46,7 @@ class Proteasome(Dataset):
         self.pictures = self.pictures.repeat(3, axis=-1)
 
         self.labels = torch.from_numpy(
-            self.labels.reshape(-1, 1).astype(np.int64))
-
-        output, self.labels = torch.unique(self.labels,
-                                           sorted=True,
-                                           return_inverse=True)
-        self.unique_labels = output
-        torch.save(output, "mappings.pt")
+            self.labels.reshape(-1, 1))
 
     def __getitem__(self, index: int):
         """

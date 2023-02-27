@@ -7,6 +7,8 @@ import torch
 import numpy as np
 import errno
 
+from utils.memory import MemoryBank
+
 def mkdir_if_missing(directory):
     if not os.path.exists(directory):
         try:
@@ -57,7 +59,7 @@ class ProgressMeter(object):
 
 
 @torch.no_grad()
-def fill_memory_bank(loader, model, memory_bank):
+def fill_memory_bank(loader, model, memory_bank:MemoryBank):
     model.eval()
     memory_bank.reset()
 

@@ -71,9 +71,8 @@ class MemoryBank(object):
         b = features.size(0)
         
         assert(b + self.ptr <= self.n)
-        
         self.features[self.ptr:self.ptr+b].copy_(features.detach())
-        self.targets[self.ptr:self.ptr+b].copy_(targets.detach())
+        self.targets[self.ptr:self.ptr+b].copy_(targets.detach().reshape(-1))
         self.ptr += b
 
     def to(self, device):
