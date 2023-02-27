@@ -135,6 +135,7 @@ dmypy.json
 root_dir/
 outputs/
 errors/
+logs/
 
 cifar-10/
 
