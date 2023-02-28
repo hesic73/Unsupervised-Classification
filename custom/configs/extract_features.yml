@@ -1,0 +1,17 @@
+# setup
+setup: extract_features
+
+# Model
+backbone: resnet18
+model_kwargs:
+   head: mlp
+   features_dim: 128
+
+# used in get_model
+train_db_name: proteasome-12
+
+transformation_kwargs:
+   crop_size: 80
+   normalize:
+    mean: [0.4149, 0.4149, 0.4149]
+    std: [0.1155, 0.1155, 0.1155]

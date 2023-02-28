@@ -20,6 +20,9 @@ def create_config(config_file_env, config_file_exp):
     # Copy
     for k, v in config.items():
         cfg[k] = v
+        
+    if cfg['setup'] in ['extract_features']:
+        return cfg
 
     # Set paths for pretext task (These directories are needed in every stage)
     base_dir = os.path.join(root_dir, cfg['train_db_name'])

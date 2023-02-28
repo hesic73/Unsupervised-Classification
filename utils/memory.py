@@ -4,23 +4,24 @@ Licensed under the CC BY-NC 4.0 license (https://creativecommons.org/licenses/by
 """
 import numpy as np
 import torch
+from torch import Tensor
 
 
 class MemoryBank(object):
-    def __init__(self, n, dim, num_classes, temperature):
+    def __init__(self, n:int, dim:int, num_classes:int, temperature:float):
         self.n = n
         self.dim = dim 
         self.features = torch.FloatTensor(self.n, self.dim)
         self.targets = torch.LongTensor(self.n)
-        self.ptr = 0
+        self.ptr:int = 0
         self.device = 'cpu'
-        self.K = 100
+        self.K:int = 100
         self.temperature = temperature
         self.C = num_classes
 
-    def weighted_knn(self, predictions):
+    def weighted_knn(self, predictions:Tensor):
         # perform weighted knn
-        retrieval_one_hot = torch.zeros(self.K, self.C).to(self.device)
+        retrieval_one_hot = torch.zeros(self.K, self.C,device=self.device)
         batchSize = predictions.shape[0]
         correlation = torch.matmul(predictions, self.features.t())
         yd, yi = correlation.topk(self.K, dim=1, largest=True, sorted=True)
@@ -84,4 +85,4 @@ class MemoryBank(object):
         self.to('cpu')
 
     def cuda(self):
-        self.to('cuda:0')
+        self.to('cuda')

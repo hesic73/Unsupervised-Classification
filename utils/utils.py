@@ -9,6 +9,7 @@ import errno
 
 from utils.memory import MemoryBank
 
+
 def mkdir_if_missing(directory):
     if not os.path.exists(directory):
         try:
@@ -19,24 +20,24 @@ def mkdir_if_missing(directory):
 
 
 class AverageMeter(object):
-    def __init__(self, name, fmt=':f'):
+    def __init__(self, name: str, fmt: str = ':f'):
         self.name = name
         self.fmt = fmt
         self.reset()
 
     def reset(self):
-        self.val = 0
-        self.avg = 0
-        self.sum = 0
-        self.count = 0
+        self.val: float = 0
+        self.avg: float = 0
+        self.sum: float = 0
+        self.count: int = 0
 
-    def update(self, val, n=1):
+    def update(self, val: float, n: int = 1):
         self.val = val
         self.sum += val * n
         self.count += n
         self.avg = self.sum / self.count
 
-    def __str__(self):
+    def __str__(self) -> str:
         fmtstr = '{name} {val' + self.fmt + '} ({avg' + self.fmt + '})'
         return fmtstr.format(**self.__dict__)
 
@@ -59,7 +60,7 @@ class ProgressMeter(object):
 
 
 @torch.no_grad()
-def fill_memory_bank(loader, model, memory_bank:MemoryBank):
+def fill_memory_bank(loader, model, memory_bank: MemoryBank):
     model.eval()
     memory_bank.reset()
 
@@ -69,7 +70,7 @@ def fill_memory_bank(loader, model, memory_bank:MemoryBank):
         output = model(images)
         memory_bank.update(output, targets)
         if i % 100 == 0:
-            print('Fill Memory Bank [%d/%d]' %(i, len(loader)))
+            print('Fill Memory Bank [%d/%d]' % (i, len(loader)))
 
 
 def confusion_matrix(predictions, gt, class_names, output_file=None):
@@ -78,17 +79,23 @@ def confusion_matrix(predictions, gt, class_names, output_file=None):
     import matplotlib.pyplot as plt
     confusion_matrix = sklearn.metrics.confusion_matrix(gt, predictions)
     confusion_matrix = confusion_matrix / np.sum(confusion_matrix, 1)
-    
+
     fig, axes = plt.subplots(1)
     plt.imshow(confusion_matrix, cmap='Blues')
     axes.set_xticks([i for i in range(len(class_names))])
     axes.set_yticks([i for i in range(len(class_names))])
     axes.set_xticklabels(class_names, ha='right', fontsize=8, rotation=40)
     axes.set_yticklabels(class_names, ha='right', fontsize=8)
-    
+
     for (i, j), z in np.ndenumerate(confusion_matrix):
         if i == j:
-            axes.text(j, i, '%d' %(100*z), ha='center', va='center', color='white', fontsize=6)
+            axes.text(j,
+                      i,
+                      '%d' % (100 * z),
+                      ha='center',
+                      va='center',
+                      color='white',
+                      fontsize=6)
         else:
             pass
 

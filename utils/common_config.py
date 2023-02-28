@@ -82,6 +82,10 @@ def get_model(p, pretrain_path=None):
             assert(p['num_heads'] == 1)
         model = ClusteringModel(backbone, p['num_classes'], p['num_heads'])
 
+    elif p['setup'] in ['extract_features']:
+        from models.models import ContrastiveModel
+        model = ContrastiveModel(backbone, **p['model_kwargs'])
+    
     else:
         raise ValueError('Invalid setup {}'.format(p['setup']))
 

@@ -115,7 +115,8 @@ def main():
 
         # Train
         print('Train ...')
-        simclr_train(train_dataloader, model, criterion, optimizer, epoch)
+        loss=simclr_train(train_dataloader, model, criterion, optimizer, epoch)
+        writer.add_scalar('loss', loss, epoch)
 
         # Fill memory bank
         print('Fill memory bank for kNN...')
