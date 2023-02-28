@@ -36,14 +36,15 @@ augmentation_strategy: simclr_custom
 augmentation_kwargs:
   random_resized_crop:
     size: 80
+    scale: [0.2, 1.0]
   random_rotation:
     degrees: 180
   normalize:
-    mean: [0.4149, 0.4149, 0.4149]
-    std: [0.1155, 0.1155, 0.1155]
+    mean: [0.4737, 0.4737, 0.4737]
+    std: [0.2635, 0.2635, 0.2635]
 
 transformation_kwargs:
   crop_size: 80
   normalize:
-    mean: [0.4149, 0.4149, 0.4149]
-    std: [0.1155, 0.1155, 0.1155]
+    mean: [0.4737, 0.4737, 0.4737]
+    std: [0.2635, 0.2635, 0.2635]

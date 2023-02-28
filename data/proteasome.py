@@ -2,7 +2,7 @@ import os
 import sys
 import numpy as np
 import torch
-from PIL import Image
+from PIL import Image, ImageOps
 from torch.utils.data import Dataset
 from utils.mypath import MyPath
 
@@ -27,11 +27,11 @@ class Proteasome(Dataset):
         self.train = train  # training set or test set
 
         if train:
-            data_filename='train_data.npy'
-            labels_filename='train_labels.npy'
+            data_filename = 'train_data.npy'
+            labels_filename = 'train_labels.npy'
         else:
-            data_filename='test_data.npy'
-            labels_filename='test_labels.npy'
+            data_filename = 'test_data.npy'
+            labels_filename = 'test_labels.npy'
 
         # (n,80,80)
         self.pictures = np.load(os.path.join(self.root, data_filename))
@@ -45,8 +45,7 @@ class Proteasome(Dataset):
         # (n,80,80,3)
         self.pictures = self.pictures.repeat(3, axis=-1)
 
-        self.labels = torch.from_numpy(
-            self.labels.reshape(-1, 1))
+        self.labels = torch.from_numpy(self.labels.reshape(-1, 1))
 
     def __getitem__(self, index: int):
         """
@@ -58,6 +57,7 @@ class Proteasome(Dataset):
         img, target = self.pictures[index], self.labels[index]
         img_size = (img.shape[0], img.shape[1])
         img = Image.fromarray(img)
+        img = ImageOps.autocontrast(img, cutoff=5)
 
         if self.transform is not None:
             img = self.transform(img)

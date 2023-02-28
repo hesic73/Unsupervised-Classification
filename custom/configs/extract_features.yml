@@ -13,5 +13,5 @@ train_db_name: proteasome-12
 transformation_kwargs:
    crop_size: 80
    normalize:
-    mean: [0.4149, 0.4149, 0.4149]
-    std: [0.1155, 0.1155, 0.1155]
+    mean: [0.4737, 0.4737, 0.4737]
+    std: [0.2635, 0.2635, 0.2635]
