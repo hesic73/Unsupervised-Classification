@@ -116,7 +116,7 @@ def main():
     # Training
     print(colored('Starting main loop', 'blue'))
 
-    run = wandb.init(project="SimCLR", config=p,
+    run = wandb.init(project="SimCLR",
                      name=args.run_name, mode=args.wandb_mode)
 
     for epoch in range(start_epoch, p['epochs']):
@@ -130,19 +130,20 @@ def main():
         loss = simclr_train(train_dataloader, model,
                             criterion, optimizer, epoch)
 
-        run.log({'loss': loss,'lr':lr}, step=epoch)
+        run.log({'loss': loss, 'lr': lr}, step=epoch)
 
         if epoch % 10 == 0:
             fill_memory_bank(val_dataloader, model, memory_bank_val)
             _, acc_val_5 = memory_bank_val.mine_nearest_neighbors(5)
-            
+
             fill_memory_bank(base_dataloader, model, memory_bank_base)
             _, acc_train_20 = memory_bank_base.mine_nearest_neighbors(20)
-            
-            top1 = contrastive_evaluate(val_dataloader, model, memory_bank_base)
-            
+
+            top1 = contrastive_evaluate(
+                val_dataloader, model, memory_bank_base)
+
             run.log({'val top5 acc': acc_val_5*100,
-                    'train top20 acc': acc_train_20*100,'kNN': top1}, step=epoch)
+                    'train top20 acc': acc_train_20*100, 'kNN eval': top1}, step=epoch)
 
             # Checkpoint
             print('Checkpoint ...')
