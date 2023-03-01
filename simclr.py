@@ -116,7 +116,7 @@ def main():
     # Training
     print(colored('Starting main loop', 'blue'))
 
-    run = wandb.init(project="SimCLR",
+    run = wandb.init(project="SimCLR",config=p,
                      name=args.run_name, mode=args.wandb_mode)
 
     for epoch in range(start_epoch, p['epochs']):
