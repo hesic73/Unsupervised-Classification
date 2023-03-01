@@ -137,4 +137,5 @@ root_dir/
 outputs/
 errors/
 cifar-10/
+/test.py
 

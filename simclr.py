@@ -125,34 +125,29 @@ def main():
 
         # Adjust lr
         lr = adjust_learning_rate(p, optimizer, epoch)
-        print('Adjusted learning rate to {:.5f}'.format(lr))
 
         # Train
-        print('Train ...')
         loss = simclr_train(train_dataloader, model,
                             criterion, optimizer, epoch)
 
-        # Fill memory bank
-        print('Fill memory bank for kNN...')
-        fill_memory_bank(base_dataloader, model, memory_bank_base)
+        run.log({'loss': loss,'lr':lr}, step=epoch)
 
-        # Evaluate (To monitor progress - Not for validation)
-        print('Evaluate ...')
-        top1 = contrastive_evaluate(val_dataloader, model, memory_bank_base)
-        print('Result of kNN evaluation is %.2f' % (top1))
-
-        # top-5 accuracy on the val dataset
         if epoch % 10 == 0:
             fill_memory_bank(val_dataloader, model, memory_bank_val)
-            _, acc = memory_bank_val.mine_nearest_neighbors(5)
-            run.log({'top-5 accuracy': acc*100}, step=epoch)
+            _, acc_val_5 = memory_bank_val.mine_nearest_neighbors(5)
+            
+            fill_memory_bank(base_dataloader, model, memory_bank_base)
+            _, acc_train_20 = memory_bank_base.mine_nearest_neighbors(20)
+            
+            top1 = contrastive_evaluate(val_dataloader, model, memory_bank_base)
+            
+            run.log({'val top5 acc': acc_val_5*100,
+                    'train top20 acc': acc_train_20*100,'kNN': top1}, step=epoch)
 
-        run.log({'kNN': top1, 'loss': loss}, step=epoch)
-
-        # Checkpoint
-        print('Checkpoint ...')
-        torch.save({'optimizer': optimizer.state_dict(), 'model': model.state_dict(),
-                    'epoch': epoch + 1}, p['pretext_checkpoint'])
+            # Checkpoint
+            print('Checkpoint ...')
+            torch.save({'optimizer': optimizer.state_dict(), 'model': model.state_dict(),
+                        'epoch': epoch + 1}, p['pretext_checkpoint'])
 
     # Save final model
     torch.save(model.state_dict(), p['pretext_model'])
