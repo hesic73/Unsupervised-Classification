@@ -10,17 +10,20 @@ import time
 
 from utils.config import create_config
 from utils.common_config import get_criterion, get_model, get_train_dataset,\
-                                get_val_dataset, get_train_dataloader,\
-                                get_val_dataloader, get_train_transformations,\
-                                get_val_transformations, get_optimizer,\
-                                adjust_learning_rate
+    get_val_dataset, get_train_dataloader,\
+    get_val_dataloader, get_train_transformations,\
+    get_val_transformations, get_optimizer,\
+    adjust_learning_rate
 from utils.evaluate_utils import contrastive_evaluate
 from utils.memory import MemoryBank
 from utils.train_utils import simclr_train
 from utils.utils import fill_memory_bank
 from termcolor import colored
 
-from torch.utils.tensorboard import SummaryWriter
+
+import wandb
+from typing import Optional
+from torch.utils.data import DataLoader
 
 # Parser
 parser = argparse.ArgumentParser(description='SimCLR')
@@ -28,7 +31,14 @@ parser.add_argument('--config_env',
                     help='Config file for the environment')
 parser.add_argument('--config_exp',
                     help='Config file for the experiment')
+parser.add_argument(
+    '--run_name', type=str, default=None, help='wandb run\'s name')
+
+parser.add_argument(
+    '--wandb_mode', type=str, default=None, choices=['online', 'offline', 'disabled'], help='wandb mode')
+
 args = parser.parse_args()
+
 
 def main():
 
@@ -40,7 +50,8 @@ def main():
     print(colored('Retrieve model', 'blue'))
     model = get_model(p)
     print('Model is {}'.format(model.__class__.__name__))
-    print('Model parameters: {:.2f}M'.format(sum(p.numel() for p in model.parameters()) / 1e6))
+    print('Model parameters: {:.2f}M'.format(
+        sum(p.numel() for p in model.parameters()) / 1e6))
     print(model)
     model = model.cuda()
 
@@ -55,7 +66,7 @@ def main():
     val_transforms = get_val_transformations(p)
     print('Validation transforms:', val_transforms)
     train_dataset = get_train_dataset(p, train_transforms, to_augmented_dataset=True,
-                                        split='train+unlabeled') # Split is for stl-10
+                                      split='train+unlabeled')  # Split is for stl-10
     val_dataset = get_val_dataset(p, val_transforms)
     train_dataloader = get_train_dataloader(p, train_dataset)
     val_dataloader = get_val_dataloader(p, val_dataset)
@@ -63,15 +74,16 @@ def main():
 
     # Memory Bank
     print(colored('Build MemoryBank', 'blue'))
-    base_dataset = get_train_dataset(p, val_transforms, split='train') # Dataset w/o augs for knn eval
+    # Dataset w/o augs for knn eval
+    base_dataset = get_train_dataset(p, val_transforms, split='train')
     base_dataloader = get_val_dataloader(p, base_dataset)
     memory_bank_base = MemoryBank(len(base_dataset),
-                                p['model_kwargs']['features_dim'],
-                                p['num_classes'], p['criterion_kwargs']['temperature'])
+                                  p['model_kwargs']['features_dim'],
+                                  p['num_classes'], p['criterion_kwargs']['temperature'])
     memory_bank_base.cuda()
     memory_bank_val = MemoryBank(len(val_dataset),
-                                p['model_kwargs']['features_dim'],
-                                p['num_classes'], p['criterion_kwargs']['temperature'])
+                                 p['model_kwargs']['features_dim'],
+                                 p['num_classes'], p['criterion_kwargs']['temperature'])
     memory_bank_val.cuda()
 
     # Criterion
@@ -87,7 +99,8 @@ def main():
 
     # Checkpoint
     if os.path.exists(p['pretext_checkpoint']):
-        print(colored('Restart from checkpoint {}'.format(p['pretext_checkpoint']), 'blue'))
+        print(colored('Restart from checkpoint {}'.format(
+            p['pretext_checkpoint']), 'blue'))
         checkpoint = torch.load(p['pretext_checkpoint'], map_location='cpu')
         optimizer.load_state_dict(checkpoint['optimizer'])
         model.load_state_dict(checkpoint['model'])
@@ -95,18 +108,19 @@ def main():
         start_epoch = checkpoint['epoch']
 
     else:
-        print(colored('No checkpoint file at {}'.format(p['pretext_checkpoint']), 'blue'))
+        print(colored('No checkpoint file at {}'.format(
+            p['pretext_checkpoint']), 'blue'))
         start_epoch = 0
         model = model.cuda()
 
     # Training
     print(colored('Starting main loop', 'blue'))
 
-    writer = SummaryWriter(
-        log_dir=os.path.join("logs/", time.strftime("%Y%m%d-%H%M%S")))
+    run = wandb.init(project="SimCLR", config=p,
+                     name=args.run_name, mode=args.wandb_mode)
 
     for epoch in range(start_epoch, p['epochs']):
-        print(colored('Epoch %d/%d' %(epoch, p['epochs']), 'yellow'))
+        print(colored('Epoch %d/%d' % (epoch, p['epochs']), 'yellow'))
         print(colored('-'*15, 'yellow'))
 
         # Adjust lr
@@ -115,8 +129,8 @@ def main():
 
         # Train
         print('Train ...')
-        loss=simclr_train(train_dataloader, model, criterion, optimizer, epoch)
-        writer.add_scalar('loss', loss, epoch)
+        loss = simclr_train(train_dataloader, model,
+                            criterion, optimizer, epoch)
 
         # Fill memory bank
         print('Fill memory bank for kNN...')
@@ -125,8 +139,16 @@ def main():
         # Evaluate (To monitor progress - Not for validation)
         print('Evaluate ...')
         top1 = contrastive_evaluate(val_dataloader, model, memory_bank_base)
-        print('Result of kNN evaluation is %.2f' %(top1))
-        writer.add_scalar('knn_evaluation', top1, epoch)
+        print('Result of kNN evaluation is %.2f' % (top1))
+
+        # top-5 accuracy on the val dataset
+        if epoch % 10 == 0:
+            fill_memory_bank(val_dataloader, model, memory_bank_val)
+            _, acc = memory_bank_val.mine_nearest_neighbors(5)
+            run.log({'top-5 accuracy': acc*100}, step=epoch)
+
+        run.log({'kNN': top1, 'loss': loss}, step=epoch)
+
         # Checkpoint
         print('Checkpoint ...')
         torch.save({'optimizer': optimizer.state_dict(), 'model': model.state_dict(),
@@ -140,20 +162,23 @@ def main():
     print(colored('Fill memory bank for mining the nearest neighbors (train) ...', 'blue'))
     fill_memory_bank(base_dataloader, model, memory_bank_base)
     topk = 20
-    print('Mine the nearest neighbors (Top-%d)' %(topk))
+    print('Mine the nearest neighbors (Top-%d)' % (topk))
     indices, acc = memory_bank_base.mine_nearest_neighbors(topk)
-    print('Accuracy of top-%d nearest neighbors on train set is %.2f' %(topk, 100*acc))
-    np.save(p['topk_neighbors_train_path'], indices)
+    print('Accuracy of top-%d nearest neighbors on train set is %.2f' %
+          (topk, 100*acc))
 
+    run.log({f"top-{topk} accuracy": 100*acc})
+    np.save(p['topk_neighbors_train_path'], indices)
 
     # Mine the topk nearest neighbors at the very end (Val)
     # These will be used for validation.
     print(colored('Fill memory bank for mining the nearest neighbors (val) ...', 'blue'))
     fill_memory_bank(val_dataloader, model, memory_bank_val)
     topk = 5
-    print('Mine the nearest neighbors (Top-%d)' %(topk))
+    print('Mine the nearest neighbors (Top-%d)' % (topk))
     indices, acc = memory_bank_val.mine_nearest_neighbors(topk)
-    print('Accuracy of top-%d nearest neighbors on val set is %.2f' %(topk, 100*acc))
+    print('Accuracy of top-%d nearest neighbors on val set is %.2f' %
+          (topk, 100*acc))
     np.save(p['topk_neighbors_val_path'], indices)
 
 

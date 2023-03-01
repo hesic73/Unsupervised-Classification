@@ -132,10 +132,9 @@ dmypy.json
 
 # custom
 
+wandb/
 root_dir/
 outputs/
 errors/
-logs/
-
 cifar-10/
 

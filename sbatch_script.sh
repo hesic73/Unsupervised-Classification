@@ -16,5 +16,7 @@
 cd /Share/UserHome/tzhao/2023/sicheng/GraduationDesign/Unsupervised-Classification
 echo 开始跑了喵
 python simclr.py --config_env custom/configs/env.yml \
---config_exp custom/configs/exp_env.yml
+--config_exp custom/configs/exp_env.yml \
+--run_name simclr_wandb_test \
+--wandb_mode offline
 echo 跑完了喵
