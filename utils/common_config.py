@@ -9,6 +9,8 @@ import torch
 import torchvision.transforms as transforms
 from data.augment import Augment, Cutout
 from utils.collate import collate_custom
+from PIL import Image, ImageOps
+from torch import Tensor
 
 
 def get_criterion(p):
@@ -85,7 +87,7 @@ def get_model(p, pretrain_path=None):
     elif p['setup'] in ['extract_features']:
         from models.models import ContrastiveModel
         model = ContrastiveModel(backbone, **p['model_kwargs'])
-    
+
     else:
         raise ValueError('Invalid setup {}'.format(p['setup']))
 
@@ -256,14 +258,22 @@ def get_train_transformations(p):
 
     elif p['augmentation_strategy'] == 'simclr_custom':
         # Augmentation strategy from the SimCLR paper
-        return transforms.Compose([
-            transforms.RandomResizedCrop(
-                **p['augmentation_kwargs']['random_resized_crop']),
-            transforms.RandomRotation(
-                **p['augmentation_kwargs']['random_rotation']),
-            transforms.ToTensor(),
-            transforms.Normalize(**p['augmentation_kwargs']['normalize'])
-        ])
+        def _transform(img: Image.Image) -> Tensor:
+            t = transforms.Compose([
+                transforms.RandomResizedCrop(
+                    **p['augmentation_kwargs']['random_resized_crop']),
+                transforms.RandomRotation(
+                    **p['augmentation_kwargs']['random_rotation']),
+                transforms.ToTensor(),
+                transforms.Normalize(**p['augmentation_kwargs']['normalize'])
+            ])
+            img = ImageOps.autocontrast(img, cutoff=5)
+
+            img = t(img)
+
+            return img
+
+        return _transform
 
     elif p['augmentation_strategy'] == 'ours':
         # Augmentation strategy from our paper
@@ -284,6 +294,20 @@ def get_train_transformations(p):
 
 
 def get_val_transformations(p):
+    if p['augmentation_strategy'] == 'simclr_custom':
+        def _transform(img: Image.Image) -> Tensor:
+            t = transforms.Compose([
+                transforms.CenterCrop(p['transformation_kwargs']['crop_size']),
+                transforms.ToTensor(),
+                transforms.Normalize(**p['transformation_kwargs']['normalize'])])
+            img = ImageOps.autocontrast(img, cutoff=5)
+
+            img = t(img)
+
+            return img
+
+        return _transform
+
     return transforms.Compose([
         transforms.CenterCrop(p['transformation_kwargs']['crop_size']),
         transforms.ToTensor(),

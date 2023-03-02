@@ -5,8 +5,9 @@ import torch
 from PIL import Image, ImageOps
 from torch.utils.data import Dataset
 from utils.mypath import MyPath
+from torch import Tensor
 
-from typing import Tuple, Optional
+from typing import Tuple, Optional,Callable
 
 from torchvision.transforms import Compose
 
@@ -19,7 +20,7 @@ class Proteasome(Dataset):
     def __init__(self,
                  root: str = MyPath.db_root_dir('proteasome-12'),
                  train: bool = True,
-                 transform: Optional[Compose] = None):
+                 transform: Optional[Callable[[Image.Image],Tensor]] = None):
 
         super(Proteasome, self).__init__()
         self.root = root
@@ -57,7 +58,6 @@ class Proteasome(Dataset):
         img, target = self.pictures[index], self.labels[index]
         img_size = (img.shape[0], img.shape[1])
         img = Image.fromarray(img)
-        img = ImageOps.autocontrast(img, cutoff=5)
 
         if self.transform is not None:
             img = self.transform(img)
