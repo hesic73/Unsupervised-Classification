@@ -25,30 +25,25 @@ import wandb
 from typing import Optional
 from torch.utils.data import DataLoader
 
-# Parser
-parser = argparse.ArgumentParser(description='SimCLR')
-parser.add_argument('--config_env',
-                    help='Config file for the environment')
-parser.add_argument('--config_exp',
-                    help='Config file for the experiment')
-parser.add_argument(
-    '--run_name', type=str, default=None, help='wandb run\'s name')
 
-parser.add_argument(
-    '--wandb_mode', type=str, default=None, choices=['online', 'offline', 'disabled'], help='wandb mode')
+def get_args():
+    # Parser
+    parser = argparse.ArgumentParser(description='SimCLR')
+    parser.add_argument('--config_env', help='Config file for the environment')
+    parser.add_argument('--config_exp', help='Config file for the experiment')
+    parser.add_argument('--run_name', type=str,
+                        default=None, help='wandb run\'s name')
+    parser.add_argument('--wandb_mode', type=str, default=None,
+                        choices=['online', 'offline', 'disabled'], help='wandb mode. It seems on slurm nodes online mode doesn\'t work')
+    args = parser.parse_args()
+    return args
 
-args = parser.parse_args()
 
-
-def main():
-
-    # Retrieve config file
-    p = create_config(args.config_env, args.config_exp)
-    print(colored(p, 'red'))
+def main(config):
 
     # Model
     print(colored('Retrieve model', 'blue'))
-    model = get_model(p)
+    model = get_model(config)
     print('Model is {}'.format(model.__class__.__name__))
     print('Model parameters: {:.2f}M'.format(
         sum(p.numel() for p in model.parameters()) / 1e6))
@@ -61,29 +56,29 @@ def main():
 
     # Dataset
     print(colored('Retrieve dataset', 'blue'))
-    train_transforms = get_train_transformations(p)
+    train_transforms = get_train_transformations(config)
     print('Train transforms:', train_transforms)
-    val_transforms = get_val_transformations(p)
+    val_transforms = get_val_transformations(config)
     print('Validation transforms:', val_transforms)
-    train_dataset = get_train_dataset(p, train_transforms, to_augmented_dataset=True,
+    train_dataset = get_train_dataset(config, train_transforms, to_augmented_dataset=True,
                                       split='train+unlabeled')  # Split is for stl-10
-    val_dataset = get_val_dataset(p, val_transforms)
-    train_dataloader = get_train_dataloader(p, train_dataset)
-    val_dataloader = get_val_dataloader(p, val_dataset)
+    val_dataset = get_val_dataset(config, val_transforms)
+    train_dataloader = get_train_dataloader(config, train_dataset)
+    val_dataloader = get_val_dataloader(config, val_dataset)
     print('Dataset contains {}/{} train/val samples'.format(len(train_dataset), len(val_dataset)))
 
     # Memory Bank
     print(colored('Build MemoryBank', 'blue'))
     # Dataset w/o augs for knn eval
-    base_dataset = get_train_dataset(p, val_transforms, split='train')
-    base_dataloader = get_val_dataloader(p, base_dataset)
+    base_dataset = get_train_dataset(config, val_transforms, split='train')
+    base_dataloader = get_val_dataloader(config, base_dataset)
     memory_bank_base = MemoryBank(len(base_dataset),
-                                  p['model_kwargs']['features_dim'],
-                                  p['num_classes'], p['criterion_kwargs']['temperature'])
+                                  config['model_kwargs']['features_dim'],
+                                  config['num_classes'], p['criterion_kwargs']['temperature'])
     memory_bank_base.cuda()
     memory_bank_val = MemoryBank(len(val_dataset),
-                                 p['model_kwargs']['features_dim'],
-                                 p['num_classes'], p['criterion_kwargs']['temperature'])
+                                 config['model_kwargs']['features_dim'],
+                                 config['num_classes'], p['criterion_kwargs']['temperature'])
     memory_bank_val.cuda()
 
     # Criterion
@@ -94,13 +89,13 @@ def main():
 
     # Optimizer and scheduler
     print(colored('Retrieve optimizer', 'blue'))
-    optimizer = get_optimizer(p, model)
+    optimizer = get_optimizer(config, model)
     print(optimizer)
 
     # Checkpoint
-    if os.path.exists(p['pretext_checkpoint']):
+    if os.path.exists(config['pretext_checkpoint']):
         print(colored('Restart from checkpoint {}'.format(
-            p['pretext_checkpoint']), 'blue'))
+            config['pretext_checkpoint']), 'blue'))
         checkpoint = torch.load(p['pretext_checkpoint'], map_location='cpu')
         optimizer.load_state_dict(checkpoint['optimizer'])
         model.load_state_dict(checkpoint['model'])
@@ -109,15 +104,15 @@ def main():
 
     else:
         print(colored('No checkpoint file at {}'.format(
-            p['pretext_checkpoint']), 'blue'))
+            config['pretext_checkpoint']), 'blue'))
         start_epoch = 0
         model = model.cuda()
 
     # Training
     print(colored('Starting main loop', 'blue'))
 
-    run = wandb.init(project="SimCLR",config=p,
-                     name=args.run_name, mode=args.wandb_mode)
+    run = wandb.init(project="SimCLR", config=config,
+                     name=config.run_name, mode=config.wandb_mode)
 
     for epoch in range(start_epoch, p['epochs']):
         print(colored('Epoch %d/%d' % (epoch, p['epochs']), 'yellow'))
@@ -179,4 +174,9 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    args = get_args()
+    # Retrieve config file
+    p = create_config(args.config_env, args.config_exp)
+    p.update({"run_name": args.run_name, "wandb_mode": args.wandb_mode})
+    print(colored(p, 'red'))
+    main(p)

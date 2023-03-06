@@ -54,6 +54,8 @@ class MemoryBank(object):
         index.add(features)
         distances, indices = index.search(
             features, topk+1)  # Sample itself is included
+        
+        index.reset()
 
         # evaluate
         if calculate_accuracy:

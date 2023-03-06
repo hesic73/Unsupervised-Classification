@@ -139,3 +139,5 @@ errors/
 cifar-10/
 /test.py
 
+resnet18.pth
+

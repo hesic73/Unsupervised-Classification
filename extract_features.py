@@ -57,7 +57,7 @@ def get_args() -> Namespace:
         '--model_path',
         type=str,
         default=
-        "root_dir/proteasome-12/pretext/model.pth.tar",
+        "/Share/UserHome/tzhao/2023/SCAN/results/proteasome-topaz-denoise/proteasome/pretext/checkpoint.pth.tar",
         help='path of the trained_model')
     parser.add_argument(
         '--data_path',

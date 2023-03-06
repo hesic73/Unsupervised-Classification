@@ -57,7 +57,7 @@ def get_model(p, pretrain_path=None):
 
         elif p['train_db_name'] in ['proteasome-12']:
             from models.resnet import resnet18
-            backbone = resnet18()
+            backbone = resnet18(os.path.abspath("./resnet18.pth"))
 
         else:
             raise NotImplementedError
@@ -265,7 +265,8 @@ def get_train_transformations(p):
                 transforms.RandomRotation(
                     **p['augmentation_kwargs']['random_rotation']),
                 transforms.ToTensor(),
-                transforms.Normalize(**p['augmentation_kwargs']['normalize'])
+                transforms.Normalize(**p['augmentation_kwargs']['normalize']),
+                transforms.RandomErasing()
             ])
             img = ImageOps.autocontrast(img, cutoff=5)
 

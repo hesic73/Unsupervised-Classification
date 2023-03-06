@@ -4,6 +4,8 @@ Licensed under the CC BY-NC 4.0 license (https://creativecommons.org/licenses/by
 """
 import torch.nn as nn
 import torchvision.models as models
+from torchvision.models.resnet import ResNet,BasicBlock
+import torch
 
 
 def resnet50():
@@ -12,7 +14,9 @@ def resnet50():
     return {'backbone': backbone, 'dim': 2048}
 
 
-def resnet18():
-    backbone = models.__dict__['resnet18']()
-    backbone.fc = nn.Identity()
-    return {'backbone': backbone, 'dim': 512}
+def resnet18(pretrained_model_path:str):
+    model=ResNet(BasicBlock, [2, 2, 2, 2])
+    state_dict=torch.load(pretrained_model_path)
+    model.load_state_dict(state_dict)
+    model.fc = nn.Identity()
+    return {'backbone': model, 'dim': 512}
