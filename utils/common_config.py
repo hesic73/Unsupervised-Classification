@@ -263,12 +263,6 @@ def get_train_transformations(p):
         return transforms.Compose([
             transforms.RandomRotation(**p['augmentation_kwargs']['random_rotation']),
             transforms.RandomResizedCrop(**p['augmentation_kwargs']['random_resized_crop']),
-            transforms.RandomHorizontalFlip(),
-             transforms.RandomApply([
-                transforms.ColorJitter(**p['augmentation_kwargs']['color_jitter'])
-            ], p=p['augmentation_kwargs']['color_jitter_random_apply']['p']),
-            transforms.RandomGrayscale(**p['augmentation_kwargs']['random_grayscale']),
-            transforms.RandomResizedCrop(**p['augmentation_kwargs']['random_resized_crop']),
             transforms.ToTensor(),
             transforms.Normalize(**p['augmentation_kwargs']['normalize']),
         ])

@@ -15,9 +15,10 @@ date +%c
 hostname
 pwd
 which python
-echo 要开始了喵
+RUN_NAME=resnet18_256
 python simclr.py --config_env custom/configs/env.yml \
---config_exp custom/configs/new_exp_env.yml \
---run_name simclr_new \
+--config_exp custom/configs/proteasome-256.yml \
+--run_name $RUN_NAME \
+--root_dir root_dir/$RUN_NAME \
 --wandb_mode offline
 echo 跑完了喵

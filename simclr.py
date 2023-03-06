@@ -8,7 +8,7 @@ import torch
 import numpy as np
 import time
 
-from utils.config import create_config
+from utils.config import create_exp_config
 from utils.common_config import get_criterion, get_model, get_train_dataset,\
     get_val_dataset, get_train_dataloader,\
     get_val_dataloader, get_train_transformations,\
@@ -31,12 +31,13 @@ def get_args():
     parser = argparse.ArgumentParser(description='SimCLR')
     parser.add_argument('--config_env', help='Config file for the environment')
     parser.add_argument('--config_exp', help='Config file for the experiment')
+    parser.add_argument('--root_dir', help='root directory for saving checkpoints etc')
     parser.add_argument('--run_name', type=str,
                         default=None, help='wandb run\'s name')
     parser.add_argument('--wandb_mode', type=str, default=None,
                         choices=['online', 'offline', 'disabled'], help='wandb mode. It seems on slurm nodes online mode doesn\'t work')
     parser.add_argument('--manually_load_model', type=str,
-                        default=None, help='load model from a checkpoint.')
+                        default=None, help='load model msnually.')
 
     args = parser.parse_args()
     return args
@@ -51,8 +52,8 @@ def main(config):
     print('Model parameters: {:.2f}M'.format(
         sum(p.numel() for p in model.parameters()) / 1e6))
     if config.manually_load_model is not None:
-        checkpoint = torch.load(args.model_path, map_location='cpu')
-        model.load_state_dict(checkpoint['model'])
+        checkpoint = torch.load(config.manually_load_model, map_location='cpu')
+        model.load_state_dict(checkpoint)
     print(model)
     model = model.cuda()
 
@@ -182,7 +183,7 @@ def main(config):
 if __name__ == '__main__':
     args = get_args()
     # Retrieve config file
-    p = create_config(args.config_env, args.config_exp)
+    p = create_exp_config(args.config_env, args.root_dir)
     p.update({"run_name": args.run_name, "wandb_mode": args.wandb_mode,
              "manually_load_model": args.manually_load_model})
     print(colored(p, 'red'))
