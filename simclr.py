@@ -35,6 +35,9 @@ def get_args():
                         default=None, help='wandb run\'s name')
     parser.add_argument('--wandb_mode', type=str, default=None,
                         choices=['online', 'offline', 'disabled'], help='wandb mode. It seems on slurm nodes online mode doesn\'t work')
+    parser.add_argument('--manually_load_model', type=str,
+                        default=None, help='load model from a checkpoint.')
+
     args = parser.parse_args()
     return args
 
@@ -47,6 +50,9 @@ def main(config):
     print('Model is {}'.format(model.__class__.__name__))
     print('Model parameters: {:.2f}M'.format(
         sum(p.numel() for p in model.parameters()) / 1e6))
+    if config.manually_load_model is not None:
+        checkpoint = torch.load(args.model_path, map_location='cpu')
+        model.load_state_dict(checkpoint['model'])
     print(model)
     model = model.cuda()
 
@@ -177,6 +183,7 @@ if __name__ == '__main__':
     args = get_args()
     # Retrieve config file
     p = create_config(args.config_env, args.config_exp)
-    p.update({"run_name": args.run_name, "wandb_mode": args.wandb_mode})
+    p.update({"run_name": args.run_name, "wandb_mode": args.wandb_mode,
+             "manually_load_model": args.manually_load_model})
     print(colored(p, 'red'))
     main(p)

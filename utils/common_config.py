@@ -56,8 +56,10 @@ def get_model(p, pretrain_path=None):
             backbone = resnet18()
 
         elif p['train_db_name'] in ['proteasome-12']:
-            from models.resnet import resnet18
-            backbone = resnet18(os.path.abspath("./resnet18.pth"))
+            # from models.resnet import resnet18
+            # backbone = resnet18(os.path.abspath("./resnet18.pth"))
+            from models.resnet_proteasome import resnet18
+            backbone = resnet18()
 
         else:
             raise NotImplementedError
@@ -258,23 +260,18 @@ def get_train_transformations(p):
 
     elif p['augmentation_strategy'] == 'simclr_custom':
         # Augmentation strategy from the SimCLR paper
-        def _transform(img: Image.Image) -> Tensor:
-            t = transforms.Compose([
-                transforms.RandomResizedCrop(
-                    **p['augmentation_kwargs']['random_resized_crop']),
-                transforms.RandomRotation(
-                    **p['augmentation_kwargs']['random_rotation']),
-                transforms.ToTensor(),
-                transforms.Normalize(**p['augmentation_kwargs']['normalize']),
-                transforms.RandomErasing()
-            ])
-            img = ImageOps.autocontrast(img, cutoff=5)
-
-            img = t(img)
-
-            return img
-
-        return _transform
+        return transforms.Compose([
+            transforms.RandomRotation(**p['augmentation_kwargs']['random_rotation']),
+            transforms.RandomResizedCrop(**p['augmentation_kwargs']['random_resized_crop']),
+            transforms.RandomHorizontalFlip(),
+             transforms.RandomApply([
+                transforms.ColorJitter(**p['augmentation_kwargs']['color_jitter'])
+            ], p=p['augmentation_kwargs']['color_jitter_random_apply']['p']),
+            transforms.RandomGrayscale(**p['augmentation_kwargs']['random_grayscale']),
+            transforms.RandomResizedCrop(**p['augmentation_kwargs']['random_resized_crop']),
+            transforms.ToTensor(),
+            transforms.Normalize(**p['augmentation_kwargs']['normalize']),
+        ])
 
     elif p['augmentation_strategy'] == 'ours':
         # Augmentation strategy from our paper
@@ -295,21 +292,7 @@ def get_train_transformations(p):
 
 
 def get_val_transformations(p):
-    if p['augmentation_strategy'] == 'simclr_custom':
-        def _transform(img: Image.Image) -> Tensor:
-            t = transforms.Compose([
-                transforms.CenterCrop(p['transformation_kwargs']['crop_size']),
-                transforms.ToTensor(),
-                transforms.Normalize(**p['transformation_kwargs']['normalize'])])
-            img = ImageOps.autocontrast(img, cutoff=5)
-
-            img = t(img)
-
-            return img
-
-        return _transform
-
-    return transforms.Compose([
+     return transforms.Compose([
         transforms.CenterCrop(p['transformation_kwargs']['crop_size']),
         transforms.ToTensor(),
         transforms.Normalize(**p['transformation_kwargs']['normalize'])])

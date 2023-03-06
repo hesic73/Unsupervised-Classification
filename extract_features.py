@@ -93,12 +93,12 @@ def inference(model: ContrastiveModel, dataloader: DataLoader, save_path: str):
 
 
 if __name__ == "__main__":
-    torch.cuda.set_device(1)
+    torch.cuda.set_device(5)
     args = get_args()
     config = create_config(args.config_env, args.config_exp)
     model = get_model(config)
     checkpoint = torch.load(args.model_path, map_location='cpu')
-    model.load_state_dict(checkpoint)
+    model.load_state_dict(checkpoint['model'])
     model.eval()
     dataloader = get_dataloader(args.data_path,
                                 get_val_transformations(config))

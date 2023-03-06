@@ -14,11 +14,10 @@
 date +%c
 hostname
 pwd
-conda activate scan
 which python
 echo 要开始了喵
 python simclr.py --config_env custom/configs/env.yml \
---config_exp custom/configs/exp_env.yml \
---run_name simclr_use_pretrained_model \
+--config_exp custom/configs/new_exp_env.yml \
+--run_name simclr_new \
 --wandb_mode offline
 echo 跑完了喵
