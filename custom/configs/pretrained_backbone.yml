@@ -2,7 +2,7 @@
 setup: simclr
 
 use_pretrained_backbone: True
-freeze_backbone: True
+freeze_backbone: False
 
 # Model
 backbone: resnet18

@@ -12,6 +12,7 @@ from utils.collate import collate_custom
 from utils.parameters import freeze_parameters
 from PIL import Image, ImageOps
 from torch import Tensor
+from utils.mypath import MyPath
 
 
 def get_criterion(p):
@@ -56,7 +57,7 @@ def get_model(p, pretrain_path=None):
             from models.resnet_stl import resnet18
             backbone = resnet18()
 
-        elif p['train_db_name'] in ['proteasome-12']:
+        elif p['train_db_name'] in ['proteasome-12', 'proteasome-11']:
             from models.resnet import resnet18
             backbone = resnet18(os.path.abspath(
                 "./resnet18.pth") if hasattr(p, 'use_pretrained_backbone') and p.use_pretrained_backbone else None)
@@ -78,7 +79,7 @@ def get_model(p, pretrain_path=None):
         raise ValueError('Invalid backbone {}'.format(p['backbone']))
 
     if hasattr(p, 'freeze_backbone') and p.freeze_backbone:
-        freeze_parameters(backbone)
+        freeze_parameters(backbone['backbone'])
 
     # Setup
     if p['setup'] in ['simclr', 'moco']:
@@ -167,6 +168,10 @@ def get_train_dataset(p, transform, to_augmented_dataset=False,
         from data.proteasome import Proteasome
         dataset = Proteasome(train=True, transform=transform)
 
+    elif p['train_db_name'] == 'proteasome-11':
+        from data.proteasome import Proteasome
+        dataset = Proteasome(str=MyPath.db_root_dir(
+            'proteasome-11'), train=True, transform=transform)
     else:
         raise ValueError('Invalid train dataset {}'.format(p['train_db_name']))
 
@@ -210,6 +215,11 @@ def get_val_dataset(p, transform=None, to_neighbors_dataset=False):
     elif p['val_db_name'] == 'proteasome-12':
         from data.proteasome import Proteasome
         dataset = Proteasome(train=False, transform=transform)
+
+    elif p['val_db_name'] == 'proteasome-11':
+        from data.proteasome import Proteasome
+        dataset = Proteasome(str=MyPath.db_root_dir(
+            'proteasome-11'), train=False, transform=transform)
 
     else:
         raise ValueError(

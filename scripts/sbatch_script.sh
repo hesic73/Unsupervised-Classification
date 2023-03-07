@@ -11,8 +11,8 @@
 #SBATCH --mail-user hesicheng2001@163.com  
 #SBATCH --chdir /Share/UserHome/tzhao/2023/sicheng/GraduationDesign/Unsupervised-Classification
 
-RUN_NAME=baseline
-CONFIG_FILE=baseline.yml
+RUN_NAME=pretrained_backbone_no_freeze
+CONFIG_FILE=pretrained_backbone.yml
 
 date +%c
 hostname
