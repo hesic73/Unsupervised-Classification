@@ -9,6 +9,7 @@ import torch
 import torchvision.transforms as transforms
 from data.augment import Augment, Cutout
 from utils.collate import collate_custom
+from utils.parameters import freeze_parameters
 from PIL import Image, ImageOps
 from torch import Tensor
 
@@ -56,10 +57,11 @@ def get_model(p, pretrain_path=None):
             backbone = resnet18()
 
         elif p['train_db_name'] in ['proteasome-12']:
-            # from models.resnet import resnet18
-            # backbone = resnet18(os.path.abspath("./resnet18.pth"))
-            from models.resnet_proteasome import resnet18
-            backbone = resnet18()
+            from models.resnet import resnet18
+            backbone = resnet18(os.path.abspath(
+                "./resnet18.pth") if hasattr(p, 'use_pretrained_backbone') and p.use_pretrained_backbone else None)
+            # from models.resnet_proteasome import resnet18
+            # backbone = resnet18()
 
         else:
             raise NotImplementedError
@@ -74,6 +76,9 @@ def get_model(p, pretrain_path=None):
 
     else:
         raise ValueError('Invalid backbone {}'.format(p['backbone']))
+
+    if hasattr(p, 'freeze_backbone') and p.freeze_backbone:
+        freeze_parameters(backbone)
 
     # Setup
     if p['setup'] in ['simclr', 'moco']:
@@ -261,8 +266,10 @@ def get_train_transformations(p):
     elif p['augmentation_strategy'] == 'simclr_custom':
         # Augmentation strategy from the SimCLR paper
         return transforms.Compose([
-            transforms.RandomRotation(**p['augmentation_kwargs']['random_rotation']),
-            transforms.RandomResizedCrop(**p['augmentation_kwargs']['random_resized_crop']),
+            transforms.RandomRotation(
+                **p['augmentation_kwargs']['random_rotation']),
+            transforms.RandomResizedCrop(
+                **p['augmentation_kwargs']['random_resized_crop']),
             transforms.ToTensor(),
             transforms.Normalize(**p['augmentation_kwargs']['normalize']),
         ])
@@ -286,7 +293,7 @@ def get_train_transformations(p):
 
 
 def get_val_transformations(p):
-     return transforms.Compose([
+    return transforms.Compose([
         transforms.CenterCrop(p['transformation_kwargs']['crop_size']),
         transforms.ToTensor(),
         transforms.Normalize(**p['transformation_kwargs']['normalize'])])

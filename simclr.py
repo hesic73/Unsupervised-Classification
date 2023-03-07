@@ -6,7 +6,7 @@ import argparse
 import os
 import torch
 import numpy as np
-import time
+from pprint import pprint
 
 from utils.config import create_exp_config
 from utils.common_config import get_criterion, get_model, get_train_dataset,\
@@ -29,7 +29,6 @@ from torch.utils.data import DataLoader
 def get_args():
     # Parser
     parser = argparse.ArgumentParser(description='SimCLR')
-    parser.add_argument('--config_env', help='Config file for the environment')
     parser.add_argument('--config_exp', help='Config file for the experiment')
     parser.add_argument('--root_dir', help='root directory for saving checkpoints etc')
     parser.add_argument('--run_name', type=str,
@@ -182,9 +181,8 @@ def main(config):
 
 if __name__ == '__main__':
     args = get_args()
-    # Retrieve config file
-    p = create_exp_config(args.config_env, args.root_dir)
+    p = create_exp_config(args.config_exp, args.root_dir)
     p.update({"run_name": args.run_name, "wandb_mode": args.wandb_mode,
              "manually_load_model": args.manually_load_model})
-    print(colored(p, 'red'))
+    pprint(p)
     main(p)

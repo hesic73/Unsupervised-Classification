@@ -1,6 +1,9 @@
 # Setup
 setup: simclr
 
+use_pretrained_backbone: True
+freeze_backbone: True
+
 # Model
 backbone: resnet18
 model_kwargs:
@@ -32,20 +35,11 @@ batch_size: 512
 num_workers: 12
 
 # Transformations
-augmentation_strategy: simclr_custom 
+augmentation_strategy: simclr_custom
 augmentation_kwargs:
    random_resized_crop:
-      size: 32
+      size: 80
       scale: [0.2, 1.0]
-   color_jitter_random_apply:
-      p: 0.8
-   color_jitter:
-      brightness: 0.4
-      contrast: 0.4
-      saturation: 0.4
-      hue: 0.1
-   random_grayscale: 
-      p: 0.2
    normalize:
       mean: [0.4149, 0.4149, 0.4149]
       std: [0.1155, 0.1155, 0.1155]

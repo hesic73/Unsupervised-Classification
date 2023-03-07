@@ -1,0 +1,50 @@
+# Setup
+setup: simclr
+
+# Model
+backbone: resnet18
+model_kwargs:
+   head: mlp
+   features_dim: 128
+
+# Dataset
+train_db_name: proteasome-12
+val_db_name: proteasome-12
+num_classes: 12
+
+# Loss
+criterion: simclr
+criterion_kwargs:
+   temperature: 0.1 
+
+# Hyperparameters
+epochs: 500
+optimizer: sgd
+optimizer_kwargs:
+   nesterov: False
+   weight_decay: 0.0001 
+   momentum: 0.9
+   lr: 0.4
+scheduler: cosine
+scheduler_kwargs:
+   lr_decay_rate: 0.1
+batch_size: 512 
+num_workers: 8
+
+# Transformations
+augmentation_strategy: simclr_custom 
+augmentation_kwargs:
+  random_resized_crop:
+    size: 80
+    scale: [0.5, 1.0]
+  random_rotation:
+    degrees: [-180, 180]
+  normalize:
+    mean: [0.4149, 0.4149, 0.4149]
+    std: [0.1155, 0.1155, 0.1155]
+
+transformation_kwargs:
+  crop_size: 80
+  normalize:
+      mean: [0.4149, 0.4149, 0.4149]
+      std: [0.1155, 0.1155, 0.1155]

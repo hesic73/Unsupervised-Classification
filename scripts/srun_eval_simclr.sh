@@ -1,0 +1,1 @@
+srun --partition=GPU2 --gres=gpu:1 scripts/eval_simclr.sh
