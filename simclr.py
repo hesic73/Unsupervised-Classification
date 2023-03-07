@@ -30,7 +30,10 @@ def get_args():
     # Parser
     parser = argparse.ArgumentParser(description='SimCLR')
     parser.add_argument('--config_exp', help='Config file for the experiment')
-    parser.add_argument('--root_dir', help='root directory for saving checkpoints etc')
+    parser.add_argument(
+        '--root_dir', help='root directory for saving checkpoints etc')
+    parser.add_argument('--project', type=str,
+                        default=None, help='wandb project\'s name')
     parser.add_argument('--run_name', type=str,
                         default=None, help='wandb run\'s name')
     parser.add_argument('--wandb_mode', type=str, default=None,
@@ -117,7 +120,7 @@ def main(config):
     # Training
     print(colored('Starting main loop', 'blue'))
 
-    run = wandb.init(project="SimCLR", config=config,
+    run = wandb.init(project="SimCLR" if config.project is None else config.project, config=config,
                      name=config.run_name, mode=config.wandb_mode)
 
     for epoch in range(start_epoch, p['epochs']):
@@ -182,7 +185,10 @@ def main(config):
 if __name__ == '__main__':
     args = get_args()
     p = create_exp_config(args.config_exp, args.root_dir)
-    p.update({"run_name": args.run_name, "wandb_mode": args.wandb_mode,
-             "manually_load_model": args.manually_load_model})
+    p.update({
+        "run_name": args.run_name,
+        "wandb_mode": args.wandb_mode,
+             "manually_load_model": args.manually_load_model,
+             "project": args.project})
     pprint(p)
     main(p)

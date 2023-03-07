@@ -11,8 +11,9 @@
 #SBATCH --mail-user hesicheng2001@163.com  
 #SBATCH --chdir /Share/UserHome/tzhao/2023/sicheng/GraduationDesign/Unsupervised-Classification
 
-RUN_NAME=pretrained_backbone_no_freeze
-CONFIG_FILE=pretrained_backbone.yml
+PROJECT=SimCLR_balanced_proteasome
+RUN_NAME=baseline
+CONFIG_FILE=/Share/UserHome/tzhao/2023/sicheng/GraduationDesign/Unsupervised-Classification/custom/proteasome_balanced/baseline.yml
 
 date +%c
 hostname
@@ -20,8 +21,9 @@ pwd
 which python
 
 python simclr.py \
---config_exp custom/configs/$CONFIG_FILE \
+--config_exp $CONFIG_FILE \
+--project $PROJECT \
 --run_name $RUN_NAME \
---root_dir root_dir/$RUN_NAME \
+--root_dir root_dir/$PROJECT/$RUN_NAME \
 --wandb_mode offline
 echo 跑完了喵
