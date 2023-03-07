@@ -166,12 +166,18 @@ def get_train_dataset(p, transform, to_augmented_dataset=False,
 
     elif p['train_db_name'] == 'proteasome-12':
         from data.proteasome import Proteasome
-        dataset = Proteasome(train=True, transform=transform)
+        dataset = Proteasome(train=True,
+                             transform=transform,
+                             autocontrast=hasattr(
+                                 p, "autocontrast") and p.autocontrast)
 
     elif p['train_db_name'] == 'proteasome-11':
         from data.proteasome import Proteasome
-        dataset = Proteasome(str=MyPath.db_root_dir(
-            'proteasome-11'), train=True, transform=transform)
+        dataset = Proteasome(root=MyPath.db_root_dir(
+            'proteasome-11'),
+            train=True,
+            transform=transform,
+            autocontrast=hasattr(p, "autocontrast") and p.autocontrast)
     else:
         raise ValueError('Invalid train dataset {}'.format(p['train_db_name']))
 
@@ -214,12 +220,17 @@ def get_val_dataset(p, transform=None, to_neighbors_dataset=False):
 
     elif p['val_db_name'] == 'proteasome-12':
         from data.proteasome import Proteasome
-        dataset = Proteasome(train=False, transform=transform)
+        dataset = Proteasome(train=False,
+                             transform=transform,
+                             autocontrast=hasattr(p, "autocontrast") and p.autocontrast)
 
     elif p['val_db_name'] == 'proteasome-11':
         from data.proteasome import Proteasome
-        dataset = Proteasome(str=MyPath.db_root_dir(
-            'proteasome-11'), train=False, transform=transform)
+        dataset = Proteasome(root=MyPath.db_root_dir(
+            'proteasome-11'), train=False,
+            transform=transform, autocontrast=hasattr(
+                p, "autocontrast") and p.autocontrast,
+            autocontrast=hasattr(p, "autocontrast") and p.autocontrast)
 
     else:
         raise ValueError(

@@ -7,7 +7,7 @@ from torch.utils.data import Dataset
 from utils.mypath import MyPath
 from torch import Tensor
 
-from typing import Tuple, Optional,Callable
+from typing import Tuple, Optional, Callable
 
 from torchvision.transforms import Compose
 
@@ -20,12 +20,14 @@ class Proteasome(Dataset):
     def __init__(self,
                  root: str = MyPath.db_root_dir('proteasome-12'),
                  train: bool = True,
-                 transform: Optional[Callable[[Image.Image],Tensor]] = None):
+                 transform: Optional[Callable[[Image.Image], Tensor]] = None,
+                 autocontrast: bool = False):
 
         super(Proteasome, self).__init__()
         self.root = root
         self.transform = transform
         self.train = train  # training set or test set
+        self.autocontrast = autocontrast
 
         if train:
             data_filename = 'train_data.npy'
@@ -61,6 +63,9 @@ class Proteasome(Dataset):
 
         if self.transform is not None:
             img = self.transform(img)
+
+        if self.autocontrast:
+            img = ImageOps.autocontrast(img, cutoff=5)
 
         out = {
             'image': img,
