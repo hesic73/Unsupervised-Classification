@@ -21,10 +21,10 @@ pwd
 which python
 
 python simclr.py \
---manually_load_model ./root_dir/baseline/proteasome-12/pretext/model.pth.tar \
 --config_exp $CONFIG_FILE \
 --project $PROJECT \
 --run_name $RUN_NAME \
 --root_dir root_dir/$PROJECT/$RUN_NAME \
---wandb_mode offline
+--wandb_mode offline 
+# --manually_load_model ./root_dir/baseline/proteasome-12/pretext/model.pth.tar \
 echo 跑完了喵

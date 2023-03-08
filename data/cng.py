@@ -61,7 +61,6 @@ class CNG(Dataset):
     #print(img[:,:,0] - img[:,:,1])
     img = Image.fromarray(img)
     
-    img.save('./1.png')
     if self.transform is not None:
       img = self.transform(img)
     out = {'image': img, 'target': target, 'meta': {'im_size': img_size, 'index': index, 'class_name': self.classes[target], 'img_name': self.img_names[index]}}
@@ -121,10 +120,3 @@ class CNG(Dataset):
     print("r_var is %f, g_var is %f, b_var is %f" % (r_var, g_var, b_var))
     return [r_mean, g_mean, g_mean], [r_var, g_var, b_var]
 
-# test code
-
-if __name__ == '__main__':
-  dataset = CNG()
-  x = dataset.data[0]
-  im = Image.fromarray(x)
-  im.save('./1.png')
