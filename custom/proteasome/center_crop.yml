@@ -1,6 +1,9 @@
 # Setup
 setup: simclr
 
+centercrop: True
+centercrop_size: 64
+
 # Model
 backbone: resnet18
 model_kwargs:
@@ -35,23 +38,16 @@ num_workers: 8
 augmentation_strategy: simclr_custom 
 augmentation_kwargs:
   random_resized_crop:
-    size: 80
+    size: 64
     scale: [0.2, 1.0]
-  color_jitter_random_apply:
-      p: 0.8
-  color_jitter:
-      brightness: 0.4
-      contrast: 0.4
   random_rotation:
     degrees: [-180, 180]
-#   discrete_random_rotation:
-#     angles: [-90,0,90,180]
   normalize:
     mean: [0.4149, 0.4149, 0.4149]
     std: [0.1155, 0.1155, 0.1155]
 
 transformation_kwargs:
-  crop_size: 80
+  crop_size: 64
   normalize:
       mean: [0.4149, 0.4149, 0.4149]
       std: [0.1155, 0.1155, 0.1155]

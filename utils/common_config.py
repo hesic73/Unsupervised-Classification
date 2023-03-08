@@ -13,6 +13,7 @@ from utils.parameters import freeze_parameters
 from PIL import Image, ImageOps
 from torch import Tensor
 from utils.mypath import MyPath
+from utils.custom_transforms import DisCreteRandomRotation
 
 
 def get_criterion(p):
@@ -57,7 +58,7 @@ def get_model(p, pretrain_path=None):
             from models.resnet_stl import resnet18
             backbone = resnet18()
 
-        elif p['train_db_name'] in ['proteasome-12', 'proteasome-11','cng']:
+        elif p['train_db_name'] in ['proteasome-12', 'proteasome-11', 'cng']:
             from models.resnet import resnet18
             backbone = resnet18(os.path.abspath(
                 "./resnet18.pth") if hasattr(p, 'use_pretrained_backbone') and p.use_pretrained_backbone else None)
@@ -164,20 +165,20 @@ def get_train_dataset(p, transform, to_augmented_dataset=False,
         dataset = ImageNetSubset(
             subset_file=subset_file, split='train', transform=transform)
 
-    elif p['train_db_name'] == 'proteasome-12':
-        from data.proteasome import Proteasome
-        dataset = Proteasome(train=True,
-                             transform=transform,
-                             autocontrast=hasattr(
-                                 p, "autocontrast") and p.autocontrast)
+    elif p['train_db_name'] in ['proteasome-12', 'proteasome-11']:
+        if hasattr(p, 'centercrop') and p.centercrop:
+            additional_args = {'centercrop': True,
+                               'centercrop_size': p.centercrop_size}
 
-    elif p['train_db_name'] == 'proteasome-11':
+        else:
+            additional_args = {}
+
         from data.proteasome import Proteasome
         dataset = Proteasome(root=MyPath.db_root_dir(
-            'proteasome-11'),
-            train=True,
+            p['train_db_name']), train=True,
             transform=transform,
-            autocontrast=hasattr(p, "autocontrast") and p.autocontrast)
+            autocontrast=hasattr(
+            p, "autocontrast") and p.autocontrast, **additional_args)
     elif p['train_db_name'] == 'cng':
         from data.cng import CNG
         dataset = CNG(split='train', transform=transform)
@@ -221,19 +222,20 @@ def get_val_dataset(p, transform=None, to_neighbors_dataset=False):
         dataset = ImageNetSubset(
             subset_file=subset_file, split='val', transform=transform)
 
-    elif p['val_db_name'] == 'proteasome-12':
-        from data.proteasome import Proteasome
-        dataset = Proteasome(train=False,
-                             transform=transform,
-                             autocontrast=hasattr(p, "autocontrast") and p.autocontrast)
+    elif p['val_db_name'] in ['proteasome-12', 'proteasome-11']:
+        if hasattr(p, 'centercrop') and p.centercrop:
+            additional_args = {'centercrop': True,
+                               'centercrop_size': p.centercrop_size}
 
-    elif p['val_db_name'] == 'proteasome-11':
+        else:
+            additional_args = {}
+
         from data.proteasome import Proteasome
         dataset = Proteasome(root=MyPath.db_root_dir(
-            'proteasome-11'), train=False,
-            transform=transform, autocontrast=hasattr(
-                p, "autocontrast") and p.autocontrast)
-        
+            p['train_db_name']), train=False,
+            transform=transform,
+            autocontrast=hasattr(p, "autocontrast") and p.autocontrast, **additional_args)
+
     elif p['val_db_name'] == 'cng':
         from data.cng import CNG
         dataset = CNG(split='test', transform=transform)
@@ -297,6 +299,10 @@ def get_train_transformations(p):
                 **p['augmentation_kwargs']['random_rotation']),
             transforms.RandomResizedCrop(
                 **p['augmentation_kwargs']['random_resized_crop']),
+            transforms.RandomApply([
+                transforms.ColorJitter(
+                    **p['augmentation_kwargs']['color_jitter'])
+            ], p=p['augmentation_kwargs']['color_jitter_random_apply']['p']),
             transforms.ToTensor(),
             transforms.Normalize(**p['augmentation_kwargs']['normalize']),
         ])

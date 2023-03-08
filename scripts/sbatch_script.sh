@@ -11,14 +11,16 @@
 #SBATCH --mail-user hesicheng2001@163.com  
 #SBATCH --chdir /Share/UserHome/tzhao/2023/sicheng/GraduationDesign/Unsupervised-Classification
 
-PROJECT=SimCLR_CNG
-RUN_NAME=baseline
-CONFIG_FILE=./custom/cng/baseline.yml
+PROJECT=SimCLR_proteasome12
+RUN_NAME=new_baseline
+CONFIG_FILE=custom/proteasome/baseline.yml
 
 date +%c
 hostname
 pwd
 which python
+
+echo $PROJECT/$RUN_NAME
 
 python simclr.py \
 --config_exp $CONFIG_FILE \

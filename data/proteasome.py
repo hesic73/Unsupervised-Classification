@@ -9,7 +9,7 @@ from torch import Tensor
 
 from typing import Tuple, Optional, Callable
 
-from torchvision.transforms import Compose
+from torchvision.transforms import Compose,CenterCrop
 
 
 class Proteasome(Dataset):
@@ -21,13 +21,15 @@ class Proteasome(Dataset):
                  root: str = MyPath.db_root_dir('proteasome-12'),
                  train: bool = True,
                  transform: Optional[Callable[[Image.Image], Tensor]] = None,
-                 autocontrast: bool = False):
+                 autocontrast: bool = False,
+                 centercrop:bool=False,**kwargs):
 
         super(Proteasome, self).__init__()
         self.root = root
         self.transform = transform
         self.train = train  # training set or test set
         self.autocontrast = autocontrast
+        self.centercrop=CenterCrop(kwargs['centercrop_size']) if centercrop else None
 
         if train:
             data_filename = 'train_data.npy'
@@ -60,13 +62,18 @@ class Proteasome(Dataset):
         img, target = self.pictures[index], self.labels[index]
         img_size = (img.shape[0], img.shape[1])
         img = Image.fromarray(img)
+        
+        
+        if self.autocontrast:
+            img = ImageOps.autocontrast(img, cutoff=5)
+            
+        if self.centercrop is not None:
+            img=self.centercrop(img)
+            img_size=img.size
 
         if self.transform is not None:
             img = self.transform(img)
-
-        if self.autocontrast:
-            img = ImageOps.autocontrast(img, cutoff=5)
-
+            
         out = {
             'image': img,
             'target': target,
