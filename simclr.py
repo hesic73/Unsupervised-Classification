@@ -55,7 +55,7 @@ def main(config):
     if config.manually_load_model is not None:
         checkpoint = torch.load(config.manually_load_model, map_location='cpu')
         model.load_state_dict(checkpoint)
-    print(model)
+    # print(model)
     model = model.cuda()
 
     # CUDNN

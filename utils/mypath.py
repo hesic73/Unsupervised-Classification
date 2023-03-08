@@ -22,7 +22,10 @@ class MyPath(object):
         
         elif database in ['proteasome-12']:
             return '/Share/UserHome/tzhao/2023/sicheng/GraduationDesign/data/proteasome12_raw'
-        
+        elif database in ['proteasome-12-cropped']:
+            return '/Share/UserHome/tzhao/2023/sicheng/GraduationDesign/data/proteasome12_cropped'
+        elif database in ['proteasome-12-masked']:
+            return '/Share/UserHome/tzhao/2023/sicheng/GraduationDesign/data/proteasome12_masked'
         elif database in ['proteasome-11']:
             return '/Share/UserHome/tzhao/2023/sicheng/GraduationDesign/data/proteasome11_balanced'
         

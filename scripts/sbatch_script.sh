@@ -11,9 +11,9 @@
 #SBATCH --mail-user hesicheng2001@163.com  
 #SBATCH --chdir /Share/UserHome/tzhao/2023/sicheng/GraduationDesign/Unsupervised-Classification
 
-PROJECT=SimCLR_proteasome12
-RUN_NAME=new_baseline
-CONFIG_FILE=custom/proteasome/baseline.yml
+PROJECT=SimCLR_proteasome12_masked
+RUN_NAME=baseline
+CONFIG_FILE=custom/proteasome_masked/baseline.yml
 
 date +%c
 hostname
@@ -30,3 +30,5 @@ python simclr.py \
 --wandb_mode offline 
 # --manually_load_model ./root_dir/baseline/proteasome-12/pretext/model.pth.tar \
 echo 跑完了喵
+
+date +%c

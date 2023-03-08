@@ -8,9 +8,9 @@ model_kwargs:
    features_dim: 128
 
 # Dataset
-train_db_name: cng
-val_db_name: cng
-num_classes: 20
+train_db_name: proteasome-12-masked
+val_db_name: proteasome-12-masked
+num_classes: 12
 
 # Loss
 criterion: simclr
@@ -29,27 +29,29 @@ scheduler: cosine
 scheduler_kwargs:
    lr_decay_rate: 0.1
 batch_size: 128
-num_workers: 12
+num_workers: 8
 
 # Transformations
-augmentation_strategy: simclr_custom
+augmentation_strategy: simclr_custom 
 augmentation_kwargs:
-   random_resized_crop:
-      size: 160
-      scale: [0.2, 1.0]
-   color_jitter_random_apply:
+  random_resized_crop:
+    size: 180
+    scale: [0.2, 1.0]
+  color_jitter_random_apply:
       p: 0.8
-   color_jitter:
+  color_jitter:
       brightness: 0.4
       contrast: 0.4
-   normalize:
-      mean: [0.4149, 0.4149, 0.4149]
-      std: [0.1155, 0.1155, 0.1155]
-   random_rotation:
-      degrees: [-180, 180]
+  random_rotation:
+    degrees: [-180, 180]
+#   discrete_random_rotation:
+#     angles: [-90,0,90,180]
+  normalize:
+    mean: [0.4149, 0.4149, 0.4149]
+    std: [0.1155, 0.1155, 0.1155]
 
 transformation_kwargs:
-   crop_size: 160
-   normalize:
+  crop_size: 180
+  normalize:
       mean: [0.4149, 0.4149, 0.4149]
       std: [0.1155, 0.1155, 0.1155]

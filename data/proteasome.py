@@ -9,7 +9,7 @@ from torch import Tensor
 
 from typing import Tuple, Optional, Callable
 
-from torchvision.transforms import Compose,CenterCrop
+from torchvision.transforms import Compose, CenterCrop
 
 
 class Proteasome(Dataset):
@@ -22,14 +22,16 @@ class Proteasome(Dataset):
                  train: bool = True,
                  transform: Optional[Callable[[Image.Image], Tensor]] = None,
                  autocontrast: bool = False,
-                 centercrop:bool=False,**kwargs):
+                 centercrop: bool = False,
+                 **kwargs):
 
         super(Proteasome, self).__init__()
         self.root = root
         self.transform = transform
         self.train = train  # training set or test set
         self.autocontrast = autocontrast
-        self.centercrop=CenterCrop(kwargs['centercrop_size']) if centercrop else None
+        self.centercrop = CenterCrop(
+            kwargs['centercrop_size']) if centercrop else None
 
         if train:
             data_filename = 'train_data.npy'
@@ -42,6 +44,9 @@ class Proteasome(Dataset):
         self.pictures = np.load(os.path.join(self.root, data_filename))
         # (n,)
         self.labels = np.load(os.path.join(self.root, labels_filename))
+        print(self.pictures.dtype)
+        if self.pictures.dtype == np.float32 or self.pictures.dtype == np.float64:
+            self.pictures = (self.pictures * 255).astype(np.uint8)
 
         self.n = self.pictures.shape[0]
 
@@ -62,18 +67,17 @@ class Proteasome(Dataset):
         img, target = self.pictures[index], self.labels[index]
         img_size = (img.shape[0], img.shape[1])
         img = Image.fromarray(img)
-        
-        
+
         if self.autocontrast:
             img = ImageOps.autocontrast(img, cutoff=5)
-            
+
         if self.centercrop is not None:
-            img=self.centercrop(img)
-            img_size=img.size
+            img = self.centercrop(img)
+            img_size = img.size
 
         if self.transform is not None:
             img = self.transform(img)
-            
+
         out = {
             'image': img,
             'target': target,
