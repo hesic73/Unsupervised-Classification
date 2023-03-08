@@ -26,5 +26,8 @@ class MyPath(object):
         elif database in ['proteasome-11']:
             return '/Share/UserHome/tzhao/2023/sicheng/GraduationDesign/data/proteasome11_balanced'
         
+        elif database =='cng':
+            return '/Share/UserHome/tzhao/2023/data/cng-simu/'
+        
         else:
             raise NotImplementedError

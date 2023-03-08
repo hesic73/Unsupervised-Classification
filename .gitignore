@@ -141,3 +141,4 @@ cifar-10/
 
 resnet18.pth
 
+*.png

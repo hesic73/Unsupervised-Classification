@@ -11,9 +11,9 @@
 #SBATCH --mail-user hesicheng2001@163.com  
 #SBATCH --chdir /Share/UserHome/tzhao/2023/sicheng/GraduationDesign/Unsupervised-Classification
 
-PROJECT=SimCLR
-RUN_NAME=baseline_finetune
-CONFIG_FILE=./custom/proteasome/baseline_finetune.yml
+PROJECT=SimCLR_CNG
+RUN_NAME=baseline
+CONFIG_FILE=./custom/cng/baseline.yml
 
 date +%c
 hostname

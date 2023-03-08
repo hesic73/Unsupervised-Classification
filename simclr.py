@@ -25,7 +25,6 @@ import wandb
 from typing import Optional
 from torch.utils.data import DataLoader
 
-
 def get_args():
     # Parser
     parser = argparse.ArgumentParser(description='SimCLR')
@@ -166,7 +165,7 @@ def main(config):
     indices, acc = memory_bank_base.mine_nearest_neighbors(topk)
     print('Accuracy of top-%d nearest neighbors on train set is %.2f' %
           (topk, 100*acc))
-
+    
     run.log({f"top-{topk} accuracy": 100*acc})
     np.save(p['topk_neighbors_train_path'], indices)
 

@@ -57,7 +57,7 @@ def get_model(p, pretrain_path=None):
             from models.resnet_stl import resnet18
             backbone = resnet18()
 
-        elif p['train_db_name'] in ['proteasome-12', 'proteasome-11']:
+        elif p['train_db_name'] in ['proteasome-12', 'proteasome-11','cng']:
             from models.resnet import resnet18
             backbone = resnet18(os.path.abspath(
                 "./resnet18.pth") if hasattr(p, 'use_pretrained_backbone') and p.use_pretrained_backbone else None)
@@ -178,6 +178,9 @@ def get_train_dataset(p, transform, to_augmented_dataset=False,
             train=True,
             transform=transform,
             autocontrast=hasattr(p, "autocontrast") and p.autocontrast)
+    elif p['train_db_name'] == 'cng':
+        from data.cng import CNG
+        dataset = CNG(split='train', transform=transform)
     else:
         raise ValueError('Invalid train dataset {}'.format(p['train_db_name']))
 
@@ -229,8 +232,11 @@ def get_val_dataset(p, transform=None, to_neighbors_dataset=False):
         dataset = Proteasome(root=MyPath.db_root_dir(
             'proteasome-11'), train=False,
             transform=transform, autocontrast=hasattr(
-                p, "autocontrast") and p.autocontrast,
-            autocontrast=hasattr(p, "autocontrast") and p.autocontrast)
+                p, "autocontrast") and p.autocontrast)
+        
+    elif p['val_db_name'] == 'cng':
+        from data.cng import CNG
+        dataset = CNG(split='test', transform=transform)
 
     else:
         raise ValueError(
