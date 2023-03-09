@@ -25,6 +25,7 @@ import wandb
 from typing import Optional
 from torch.utils.data import DataLoader
 
+
 def get_args():
     # Parser
     parser = argparse.ArgumentParser(description='SimCLR')
@@ -136,17 +137,28 @@ def main(config):
         run.log({'loss': loss, 'lr': lr}, step=epoch)
 
         if epoch % 10 == 0:
-            fill_memory_bank(val_dataloader, model, memory_bank_val)
-            _, acc_val_5 = memory_bank_val.mine_nearest_neighbors(5)
-
+            print('Fill memory bank for kNN...')
             fill_memory_bank(base_dataloader, model, memory_bank_base)
-            _, acc_train_20 = memory_bank_base.mine_nearest_neighbors(20)
 
+            print('Evaluate ...')
             top1 = contrastive_evaluate(
                 val_dataloader, model, memory_bank_base)
+            print('Result of kNN evaluation is %.2f' % (top1))
 
-            run.log({'val top5 acc': acc_val_5*100,
-                    'train top20 acc': acc_train_20*100, 'kNN eval': top1}, step=epoch)
+            _, acc1 = memory_bank_base.mine_nearest_neighbors(1)
+            print(
+                'Accuracy of top-{} nearest neighbors on validation set is {:.2f}'.format(1, 100*acc1))
+
+            _, acc5 = memory_bank_base.mine_nearest_neighbors(5)
+            print(
+                'Accuracy of top-{} nearest neighbors on validation set is {:.2f}'.format(5, 100*acc5))
+
+            _, acc20 = memory_bank_base.mine_nearest_neighbors(20)
+            print(
+                'Accuracy of top-{} nearest neighbors on validation set is {:.2f}'.format(20, 100*acc20))
+
+            run.log({'Acc-top5': acc5, 'Acc-top20': acc20,
+                    'Acc-top1': acc1, 'kNN-eval': top1}, step=epoch)
 
             # Checkpoint
             print('Checkpoint ...')
@@ -165,7 +177,7 @@ def main(config):
     indices, acc = memory_bank_base.mine_nearest_neighbors(topk)
     print('Accuracy of top-%d nearest neighbors on train set is %.2f' %
           (topk, 100*acc))
-    
+
     run.log({f"top-{topk} accuracy": 100*acc})
     np.save(p['topk_neighbors_train_path'], indices)
 

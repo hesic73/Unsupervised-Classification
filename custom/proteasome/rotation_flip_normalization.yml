@@ -33,11 +33,8 @@ batch_size: 512
 num_workers: 8
 
 # Transformations
-augmentation_strategy: simclr_custom 
+augmentation_strategy: rotation_flip_normalization
 augmentation_kwargs:
-  random_resized_crop:
-    size: 80
-    scale: [0.2, 1.0]
   random_rotation:
     degrees: [-180, 180]
   normalize:

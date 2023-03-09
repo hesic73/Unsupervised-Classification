@@ -319,6 +319,13 @@ def get_train_transformations(p):
                 length=p['augmentation_kwargs']['cutout_kwargs']['length'],
                 random=p['augmentation_kwargs']['cutout_kwargs']['random'])])
 
+    elif p['augmentation_strategy'] == 'rotation_flip_normalization':
+        return transforms.Compose([
+            transforms.RandomRotation(**p['augmentation_kwargs']['random_rotation']),
+            transforms.RandomHorizontalFlip(),
+            transforms.ToTensor(),
+            transforms.Normalize(**p['augmentation_kwargs']['normalize']),
+        ])
     else:
         raise ValueError('Invalid augmentation strategy {}'.format(
             p['augmentation_strategy']))

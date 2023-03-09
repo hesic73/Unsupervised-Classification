@@ -9,18 +9,19 @@
 #SBATCH --ntasks-per-node=8
 #SBATCH --gres=gpu:1
 #SBATCH --mail-user hesicheng2001@163.com  
+#SBATCH --nodelist=gpu002
 #SBATCH --chdir /Share/UserHome/tzhao/2023/sicheng/GraduationDesign/Unsupervised-Classification
 
-PROJECT=SimCLR_proteasome12_masked
-RUN_NAME=baseline
-CONFIG_FILE=custom/proteasome_masked/baseline.yml
+PROJECT=SimCLR_proteasome12
+RUN_NAME=test
+CONFIG_FILE=custom/proteasome/rotation_flip_normalization.yml
 
 date +%c
 hostname
 pwd
 which python
 
-echo $PROJECT/$RUN_NAME
+echo Project/name: $PROJECT/$RUN_NAME
 
 python simclr.py \
 --config_exp $CONFIG_FILE \

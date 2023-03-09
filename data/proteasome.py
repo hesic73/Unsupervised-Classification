@@ -44,7 +44,7 @@ class Proteasome(Dataset):
         self.pictures = np.load(os.path.join(self.root, data_filename))
         # (n,)
         self.labels = np.load(os.path.join(self.root, labels_filename))
-        print(self.pictures.dtype)
+
         if self.pictures.dtype == np.float32 or self.pictures.dtype == np.float64:
             self.pictures = (self.pictures * 255).astype(np.uint8)
 
