@@ -6,6 +6,7 @@ import os
 import yaml
 from easydict import EasyDict
 from utils.utils import mkdir_if_missing
+from typing import Optional
 
 
 def create_config(config_file_env, config_file_exp):
@@ -35,8 +36,8 @@ def create_config(config_file_env, config_file_exp):
     cfg['pretext_model'] = os.path.join(pretext_dir, 'model.pth.tar')
     cfg['topk_neighbors_train_path'] = os.path.join(
         pretext_dir, 'topk-train-neighbors.npy')
-    cfg['topk_neighbors_val_path'] = os.path.join(
-        pretext_dir, 'topk-val-neighbors.npy')
+    cfg['topk_neighbors_val_path'] = os.path.join(pretext_dir,
+                                                  'topk-val-neighbors.npy')
 
     # If we perform clustering or self-labeling step we need additional paths.
     # We also include a run identifier to support multiple runs w/ same hyperparams.
@@ -51,14 +52,17 @@ def create_config(config_file_env, config_file_exp):
         cfg['scan_checkpoint'] = os.path.join(scan_dir, 'checkpoint.pth.tar')
         cfg['scan_model'] = os.path.join(scan_dir, 'model.pth.tar')
         cfg['selflabel_dir'] = selflabel_dir
-        cfg['selflabel_checkpoint'] = os.path.join(
-            selflabel_dir, 'checkpoint.pth.tar')
+        cfg['selflabel_checkpoint'] = os.path.join(selflabel_dir,
+                                                   'checkpoint.pth.tar')
         cfg['selflabel_model'] = os.path.join(selflabel_dir, 'model.pth.tar')
 
     return cfg
 
+
 # It's hard to maintain two files for one experiment when there are too many experiments
-def create_exp_config(config_file_exp: str, root_dir: str) -> EasyDict:
+# And in some cases I don't need a root directory.
+def create_exp_config(config_file_exp: str,
+                      root_dir: Optional[str] = None) -> EasyDict:
 
     with open(config_file_exp, 'r') as stream:
         config = yaml.safe_load(stream)
@@ -69,7 +73,8 @@ def create_exp_config(config_file_exp: str, root_dir: str) -> EasyDict:
     for k, v in config.items():
         cfg[k] = v
 
-    if cfg['setup'] in ['extract_features']:
+    # skip creating unused directories.
+    if root_dir is None:
         return cfg
 
     # Set paths for pretext task (These directories are needed in every stage)
@@ -82,8 +87,8 @@ def create_exp_config(config_file_exp: str, root_dir: str) -> EasyDict:
     cfg['pretext_model'] = os.path.join(pretext_dir, 'model.pth.tar')
     cfg['topk_neighbors_train_path'] = os.path.join(
         pretext_dir, 'topk-train-neighbors.npy')
-    cfg['topk_neighbors_val_path'] = os.path.join(
-        pretext_dir, 'topk-val-neighbors.npy')
+    cfg['topk_neighbors_val_path'] = os.path.join(pretext_dir,
+                                                  'topk-val-neighbors.npy')
 
     # If we perform clustering or self-labeling step we need additional paths.
     # We also include a run identifier to support multiple runs w/ same hyperparams.
@@ -98,8 +103,8 @@ def create_exp_config(config_file_exp: str, root_dir: str) -> EasyDict:
         cfg['scan_checkpoint'] = os.path.join(scan_dir, 'checkpoint.pth.tar')
         cfg['scan_model'] = os.path.join(scan_dir, 'model.pth.tar')
         cfg['selflabel_dir'] = selflabel_dir
-        cfg['selflabel_checkpoint'] = os.path.join(
-            selflabel_dir, 'checkpoint.pth.tar')
+        cfg['selflabel_checkpoint'] = os.path.join(selflabel_dir,
+                                                   'checkpoint.pth.tar')
         cfg['selflabel_model'] = os.path.join(selflabel_dir, 'model.pth.tar')
 
     return cfg

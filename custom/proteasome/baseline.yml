@@ -47,11 +47,11 @@ augmentation_kwargs:
 #   discrete_random_rotation:
 #     angles: [-90,0,90,180]
   normalize:
-    mean: [0.4149, 0.4149, 0.4149]
-    std: [0.1155, 0.1155, 0.1155]
+    mean: 0.4149
+    std: 0.1155
 
 transformation_kwargs:
   crop_size: 80
   normalize:
-      mean: [0.4149, 0.4149, 0.4149]
-      std: [0.1155, 0.1155, 0.1155]
+      mean: 0.4149
+      std: 0.1155

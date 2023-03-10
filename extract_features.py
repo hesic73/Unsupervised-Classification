@@ -1,105 +1,86 @@
 import torch
-from torch import nn
-from torch.utils.data import Dataset, DataLoader
-import torchvision.transforms as transforms
-
-import numpy as np
-from PIL import Image
+from torch.utils.data import DataLoader, ConcatDataset
+import os
 
 import argparse
 from argparse import Namespace
-import typing
 from tqdm import tqdm
 
 from models.models import ContrastiveModel
-from utils.common_config import get_model, get_val_transformations
-from utils.config import create_config
-
-
-class CustomDataset(Dataset):
-    def __init__(self, data_path: str, transforms: transforms.Compose) -> None:
-        self.data = np.load(data_path)
-        self.data = np.expand_dims(self.data, axis=-1)
-        self.data = self.data.repeat(3, axis=-1)
-        self.transforms = transforms
-
-    def __len__(self):
-        return len(self.data)
-
-    def __getitem__(self, index: int):
-        img = Image.fromarray(self.data[index])
-        return self.transforms(img)
-
-
-def get_dataloader(data_path: str,
-                   transforms: transforms.Compose) -> DataLoader:
-    dataset = CustomDataset(data_path, transforms)
-    return DataLoader(dataset, batch_size=256)
+from utils.common_config import get_model, \
+    get_val_transformations, \
+     get_train_dataset, get_val_dataset
+from utils.config import create_exp_config
+from utils.collate import collate_custom
 
 
 def get_args() -> Namespace:
     parser = argparse.ArgumentParser(description='用训练好的模型提取特征')
-    parser.add_argument(
-        '--config_env',
-        type=str,
-        default=
-        'custom/configs/env.yml',
-        help=
-        'no use here.(But it must be a valid yml file for compatibility with other settings.)'
-    )
-    parser.add_argument(
-        '--config_exp',
-        type=str,
-        default=
-        "custom/configs/extract_features.yml",
-        help='Config file for the experiment')
+    parser.add_argument('--config_exp',
+                        type=str,
+                        default="custom/cng/baseline.yml")
     parser.add_argument(
         '--model_path',
         type=str,
-        default=
-        "/Share/UserHome/tzhao/2023/SCAN/results/proteasome-topaz-denoise/proteasome/pretext/checkpoint.pth.tar",
+        default="root_dir/SimCLR_CNG/new_baseline/cng/pretext/model.pth.tar",
         help='path of the trained_model')
     parser.add_argument(
-        '--data_path',
+        '--output_dir',
         type=str,
         default=
-        "/Share/UserHome/tzhao/2023/sicheng/GraduationDesign/data/data_denoised.npy",
-        help='path of the .npy file')
-    parser.add_argument(
-        '--save_path',
-        type=str,
-        default=
-        "/Share/UserHome/tzhao/2023/sicheng/GraduationDesign/data/extracted_features.pt",
+        "/Share/UserHome/tzhao/2023/sicheng/GraduationDesign/data/cng_features",
     )
 
     args = parser.parse_args()
 
     return args
 
+def get_dataloader(p)->DataLoader:
+    t=get_val_transformations(p)
+    train_dataset=get_train_dataset(p,t)
+    val_dataset=get_val_dataset(p,t)
+    print(
+        f"train/val dataset lengths: {len(train_dataset)}/{len(val_dataset)}")
+    dataset=ConcatDataset([train_dataset,val_dataset])
+    return DataLoader(dataset,
+               num_workers=p['num_workers'],
+               batch_size=p['batch_size'],
+               pin_memory=True,
+               collate_fn=collate_custom,
+               shuffle=True)
+
 
 @torch.no_grad()
-def inference(model: ContrastiveModel, dataloader: DataLoader, save_path: str):
+def inference(model: ContrastiveModel, dataloader: DataLoader, output_dir: str):
     model.cuda()
-    outputs = []
-    for x in tqdm(dataloader, "extracting features..."):
+    features=[]
+    labels=[]
+    for b in tqdm(dataloader, "extracting features..."):
+        x=b['image']
+        l=b['target']
         x = x.cuda(non_blocking=True)
         y = model(x)
-        outputs.append(y.detach().clone().cpu())
+        features.append(y.detach().clone().cpu())
+        labels.append(l.detach().clone())
 
-    outputs = torch.cat(outputs)
-    print(outputs.shape)
-    torch.save(outputs, save_path)
-    print(f"save at {save_path}.")
+    features = torch.cat(features)
+    print(features.shape)
+    labels = torch.cat(labels)
+    print(labels.shape)
+    print(f"save at {output_dir}.")
+    torch.save(features, os.path.join(output_dir,"extracted_features.pt"))
+    torch.save(labels, os.path.join(output_dir,"labels.pt"))
+
 
 
 if __name__ == "__main__":
-    torch.cuda.set_device(5)
     args = get_args()
-    config = create_config(args.config_env, args.config_exp)
+    config = create_exp_config(args.config_exp)
     model = get_model(config)
     checkpoint = torch.load(args.model_path, map_location='cpu')
-    model.load_state_dict(checkpoint['model'])
+    model.load_state_dict(checkpoint)
     model.eval()
-    dataloader = get_dataloader(args.data_path,
-                                get_val_transformations(config))
-    inference(model, dataloader, args.save_path)
+
+    dataloader=get_dataloader(config)
+
+    inference(model, dataloader, args.output_dir)

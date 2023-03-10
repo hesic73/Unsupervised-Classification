@@ -51,9 +51,9 @@ class Proteasome(Dataset):
         self.n = self.pictures.shape[0]
 
         # (n,80,80,1)
-        self.pictures = np.expand_dims(self.pictures, axis=-1)
+        # self.pictures = np.expand_dims(self.pictures, axis=-1)
         # (n,80,80,3)
-        self.pictures = self.pictures.repeat(3, axis=-1)
+        # self.pictures = self.pictures.repeat(3, axis=-1)
 
         self.labels = torch.from_numpy(self.labels.reshape(-1, 1))
 

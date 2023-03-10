@@ -13,8 +13,8 @@
 #SBATCH --chdir /Share/UserHome/tzhao/2023/sicheng/GraduationDesign/Unsupervised-Classification
 
 PROJECT=SimCLR_proteasome12
-RUN_NAME=test
-CONFIG_FILE=custom/proteasome/rotation_flip_normalization.yml
+RUN_NAME=resnet18_inchannel1
+CONFIG_FILE=custom/proteasome/baseline.yml
 
 date +%c
 hostname
