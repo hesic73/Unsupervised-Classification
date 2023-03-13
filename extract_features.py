@@ -47,7 +47,7 @@ def get_dataloader(p)->DataLoader:
                batch_size=p['batch_size'],
                pin_memory=True,
                collate_fn=collate_custom,
-               shuffle=True)
+               shuffle=False)
 
 
 @torch.no_grad()
@@ -68,9 +68,8 @@ def inference(model: ContrastiveModel, dataloader: DataLoader, output_dir: str):
     labels = torch.cat(labels)
     print(labels.shape)
     print(f"save at {output_dir}.")
-    torch.save(features, os.path.join(output_dir,"extracted_features.pt"))
-    torch.save(labels, os.path.join(output_dir,"labels.pt"))
-
+    torch.save(features, os.path.join(output_dir,"train_data.pt"))
+    torch.save(labels, os.path.join(output_dir,"train_labels.pt"))
 
 
 if __name__ == "__main__":
