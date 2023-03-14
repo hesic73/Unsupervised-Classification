@@ -7,7 +7,7 @@ import os
 import torch
 
 from termcolor import colored
-from utils.config import create_config
+from utils.config import create_exp_config
 from utils.common_config import get_train_transformations, get_val_transformations,\
                                 get_train_dataset, get_train_dataloader,\
                                 get_val_dataset, get_val_dataloader,\
@@ -17,12 +17,12 @@ from utils.evaluate_utils import get_predictions, scan_evaluate, hungarian_evalu
 from utils.train_utils import scan_train
 
 FLAGS = argparse.ArgumentParser(description='SCAN Loss')
-FLAGS.add_argument('--config_env', help='Location of path config file')
+FLAGS.add_argument('--root_dir', help='Root directory of the environment')
 FLAGS.add_argument('--config_exp', help='Location of experiments config file')
 
 def main():
     args = FLAGS.parse_args()
-    p = create_config(args.config_env, args.config_exp)
+    p = create_exp_config(args.config_exp,args.root_dir)
     print(colored(p, 'red'))
 
     # CUDNN

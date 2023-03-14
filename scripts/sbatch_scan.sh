@@ -14,7 +14,7 @@
 
 PROJECT=SimCLR_CNG
 RUN_NAME=baseline
-CONFIG_FILE=custom/cng/baseline.yml
+CONFIG_FILE=custom/scan/cng.yml
 
 date +%c
 hostname
@@ -23,13 +23,11 @@ which python
 
 echo Project/name: $PROJECT/$RUN_NAME
 
-python simclr.py \
+python scan.py \
 --config_exp $CONFIG_FILE \
---project $PROJECT \
---run_name $RUN_NAME \
---root_dir root_dir/$PROJECT/$RUN_NAME \
---wandb_mode offline 
-# --manually_load_model ./root_dir/baseline/proteasome-12/pretext/model.pth.tar \
+--root_dir root_dir/$PROJECT/$RUN_NAME 
+
+
 echo 跑完了喵
 
 date +%c
