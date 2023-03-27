@@ -10,16 +10,16 @@ class MyPath(object):
     def db_root_dir(database=''):
         if database == 'cifar-10':
             return './cifar-10'
-        
+
         elif database == 'cifar-20':
             return '/path/to/cifar-20/'
 
         elif database == 'stl-10':
             return '/path/to/stl-10/'
-        
+
         elif database in ['imagenet', 'imagenet_50', 'imagenet_100', 'imagenet_200']:
             return '/path/to/imagenet/'
-        
+
         elif database in ['proteasome-12']:
             return '/Share/UserHome/tzhao/2023/sicheng/GraduationDesign/data/proteasome12_raw'
         elif database in ['proteasome-12-cropped']:
@@ -28,9 +28,11 @@ class MyPath(object):
             return '/Share/UserHome/tzhao/2023/sicheng/GraduationDesign/data/proteasome12_masked'
         elif database in ['proteasome-11']:
             return '/Share/UserHome/tzhao/2023/sicheng/GraduationDesign/data/proteasome11_balanced'
-        
+
         elif database =='cng':
             return '/Share/UserHome/tzhao/2023/data/cng-simu/'
-        
+        elif database=='tomo':
+            return "/Share/UserHome/tzhao/2023/sicheng/GraduationDesign/data/tomo/image"
+
         else:
             raise NotImplementedError

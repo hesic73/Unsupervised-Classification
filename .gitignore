@@ -142,3 +142,5 @@ cifar-10/
 resnet18.pth
 
 *.png
+
+py_scripts

@@ -12,9 +12,9 @@
 #SBATCH --nodelist=gpu002
 #SBATCH --chdir /Share/UserHome/tzhao/2023/sicheng/GraduationDesign/Unsupervised-Classification
 
-PROJECT=SimCLR_CNG
+PROJECT=SimCLR_tomo
 RUN_NAME=baseline
-CONFIG_FILE=custom/cng/baseline.yml
+CONFIG_FILE=custom/tomo/baseline.yml
 
 date +%c
 hostname

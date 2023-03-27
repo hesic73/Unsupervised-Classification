@@ -22,16 +22,16 @@ def get_args() -> Namespace:
     parser = argparse.ArgumentParser(description='用DeepDPM的结果对图像进行分类')
     parser.add_argument('--config_exp',
                         type=str,
-                        default="custom/cng/baseline.yml")
+                        default="custom/tomo/baseline.yml")
     parser.add_argument(
         '--output_dir',
         type=str,
-        default="/Share/UserHome/tzhao/2023/sicheng/GraduationDesign/data/cng_deepDPM_results",
+        default="/Share/UserHome/tzhao/2023/sicheng/GraduationDesign/data/tomo_deepDPM_results",
     )
     parser.add_argument(
         '--clusters_path',
         type=str,
-        default="/Share/UserHome/tzhao/2023/sicheng/GraduationDesign/DeepDPM/results/clusters.npy",
+        default="/Share/UserHome/tzhao/2023/sicheng/GraduationDesign/DeepDPM/results/tomo_clusters.npy",
     )
 
     args = parser.parse_args()

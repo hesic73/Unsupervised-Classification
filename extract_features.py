@@ -18,17 +18,17 @@ def get_args() -> Namespace:
     parser = argparse.ArgumentParser(description='用训练好的模型提取特征')
     parser.add_argument('--config_exp',
                         type=str,
-                        default="custom/cng/baseline.yml")
+                        default="custom/tomo/baseline.yml")
     parser.add_argument(
         '--model_path',
         type=str,
-        default="root_dir/SimCLR_CNG/new_baseline/cng/pretext/model.pth.tar",
+        default="root_dir/SimCLR_tomo/baseline/tomo/pretext/model.pth.tar",
         help='path of the trained_model')
     parser.add_argument(
         '--output_dir',
         type=str,
         default=
-        "/Share/UserHome/tzhao/2023/sicheng/GraduationDesign/data/cng_features",
+        "/Share/UserHome/tzhao/2023/sicheng/GraduationDesign/data/tomo_features",
     )
 
     args = parser.parse_args()

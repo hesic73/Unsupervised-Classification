@@ -1,0 +1,52 @@
+# Setup
+setup: simclr
+
+# Model
+backbone: resnet18
+model_kwargs:
+   head: mlp
+   features_dim: 32
+
+# Dataset
+train_db_name: tomo
+val_db_name: tomo
+num_classes: 5
+
+# Loss
+criterion: simclr
+criterion_kwargs:
+   temperature: 0.1 
+
+# Hyperparameters
+epochs: 500
+optimizer: sgd
+optimizer_kwargs:
+   nesterov: False
+   weight_decay: 0.0001 
+   momentum: 0.9
+   lr: 0.4
+scheduler: cosine
+scheduler_kwargs:
+   lr_decay_rate: 0.1
+batch_size: 128
+num_workers: 12
+
+# Transformations
+augmentation_strategy: tomo
+augmentation_kwargs:
+   color_jitter_random_apply:
+      p: 0.8
+   color_jitter:
+      brightness: 0.4
+      contrast: 0.4
+   normalize:
+      mean: [0.4149, 0.4149, 0.4149]
+      std: [0.1155, 0.1155, 0.1155]
+   random_rotation:
+      degrees: [-180, 180]
+
+transformation_kwargs:
+   crop_size: 30
+   normalize:
+      mean: [0.4149, 0.4149, 0.4149]
+      std: [0.1155, 0.1155, 0.1155]

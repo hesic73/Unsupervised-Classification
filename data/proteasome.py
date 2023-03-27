@@ -57,7 +57,7 @@ class Proteasome(Dataset):
 
         self.labels = torch.from_numpy(self.labels.reshape(-1, 1))
 
-    def __getitem__(self, index: int):
+    def __getitem__(self, index):
         """
         Args:
             index (int): Index
